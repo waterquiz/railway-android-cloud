@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android Cloud Device - Railway</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-icon">🤖</div>
+            <div>
+                <h1>Android Cloud Device</h1>
+                <span class="subtitle">Cloud-hosted Virtual Device on Railway</span>
+            </div>
+        </div>
+        <div class="header-status">
+            <div id="status-badge" class="badge badge-offline">
+                <span class="dot"></span>
+                <span id="status-text">Checking Status...</span>
+            </div>
+            <div id="kvm-badge" class="badge badge-warning" title="KVM Hardware Acceleration Status">
+                <span class="dot"></span>
+                <span id="kvm-text">KVM: Probing...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Left Panel: Controls & APK Manager -->
+        <section class="panel left-panel">
+            <!-- APK Management Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📦 APK Management</h2>
+                </div>
+                <div class="card-body">
+                    <form id="upload-form" class="drop-zone" id="drop-zone">
+                        <input type="file" id="apk-file-input" accept=".apk" hidden>
+                        <div class="drop-zone-prompt" id="drop-zone-prompt">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p><strong>Click to choose APK</strong> or drag and drop</p>
+                            <span class="file-hint">Android Application Package (.apk)</span>
+                        </div>
+                        <div id="selected-file-info" class="selected-file-info hidden">
+                            <span class="file-name" id="selected-filename">sample.apk</span>
+                            <span class="file-size" id="selected-filesize">0 MB</span>
+                        </div>
+                    </form>
+
+                    <div class="form-actions">
+                        <button id="upload-btn" class="btn btn-primary" disabled>
+                            <span>⬆️ Upload APK</span>
+                        </button>
+                    </div>
+
+                    <div id="upload-progress-container" class="progress-bar-container hidden">
+                        <div id="upload-progress-bar" class="progress-bar"></div>
+                        <span id="upload-progress-text" class="progress-text">Uploading...</span>
+                    </div>
+
+                    <div id="apk-result-card" class="apk-result-card hidden">
+                        <div class="apk-details">
+                            <div class="detail-row">
+                                <span class="label">Package:</span>
+                                <span class="value" id="res-package-name">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Activity:</span>
+                                <span class="value" id="res-activity">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Install:</span>
+                                <span class="value status-pill" id="res-install-status">-</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="install-btn" class="btn btn-secondary">Install APK</button>
+                            <button id="launch-btn" class="btn btn-accent">Launch App</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Virtual Device Keypad Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>🎮 Device Controls</h2>
+                </div>
+                <div class="card-body">
+                    <div class="control-grid">
+                        <button class="key-btn" data-key="BACK" title="Back (ESC)">
+                            <span>◀ Back</span>
+                        </button>
+                        <button class="key-btn" data-key="HOME" title="Home">
+                            <span>⌂ Home</span>
+                        </button>
+                        <button class="key-btn" data-key="APP_SWITCH" title="Recents">
+                            <span>▢ Recents</span>
+                        </button>
+                        <button class="key-btn" data-key="VOLUME_DOWN" title="Volume Down">
+                            <span>🔉 Vol -</span>
+                        </button>
+                        <button class="key-btn" data-key="VOLUME_UP" title="Volume Up">
+                            <span>🔊 Vol +</span>
+                        </button>
+                        <button class="key-btn" data-key="POWER" title="Power / Lock">
+                            <span>⏻ Power</span>
+                        </button>
+                    </div>
+
+                    <div class="text-input-group">
+                        <input type="text" id="device-text-input" placeholder="Type text into device...">
+                        <button id="send-text-btn" class="btn btn-secondary">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KVM Diagnostics Info Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>⚡ Acceleration & System Info</h2>
+                </div>
+                <div class="card-body">
+                    <div class="info-table">
+                        <div class="info-row">
+                            <span>KVM Node (/dev/kvm):</span>
+                            <strong id="diag-kvm-node">Probing...</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>accel-check:</span>
+                            <strong id="diag-accel-check">Probing...</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Current Mode:</span>
+                            <strong id="diag-mode">Unknown</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Android OS:</span>
+                            <strong id="diag-os">-</strong>
+                        </div>
+                    </div>
+                    <div class="kvm-explanation" id="kvm-explanation-box">
+                        <p id="kvm-explanation-text">Detecting cloud virtualization mode...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Screen Viewer & Console -->
+        <section class="panel right-panel">
+            <div class="card screen-card">
+                <div class="card-header screen-card-header">
+                    <h2>📱 Android Screen</h2>
+                    <div class="screen-controls">
+                        <button id="refresh-screen-btn" class="btn btn-small" title="Force Screen Refresh">🔄 Refresh</button>
+                        <button id="fullscreen-btn" class="btn btn-small" title="Fullscreen">⛶ Fullscreen</button>
+                        <a id="vnc-direct-link" href="/novnc/vnc_lite.html?path=websockify&autoconnect=true&resize=scale" target="_blank" class="btn btn-small" title="Open Full noVNC Client">Open noVNC ↗</a>
+                    </div>
+                </div>
+                <div class="screen-viewport-wrapper">
+                    <!-- Embedded noVNC Frame -->
+                    <iframe id="novnc-frame" src="/novnc/vnc_lite.html?path=websockify&autoconnect=true&resize=scale" class="vnc-iframe" allowfullscreen></iframe>
+                    
+                    <!-- Booting / Offline Overlay -->
+                    <div id="screen-overlay" class="screen-overlay">
+                        <div class="overlay-content">
+                            <div class="spinner"></div>
+                            <h3 id="overlay-title">Starting Android Cloud Device</h3>
+                            <p id="overlay-desc">Initializing virtual framebuffer & Android emulator...</p>
+                            <div class="overlay-kvm-note" id="overlay-kvm-note"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Logs Tab Panel -->
+            <div class="card logs-card">
+                <div class="card-header log-header">
+                    <h2>📋 Live Logs</h2>
+                    <div class="log-switch">
+                        <button id="tab-emulator-logs" class="log-tab active">Emulator Log</button>
+                        <button id="tab-logcat" class="log-tab">Logcat</button>
+                        <button id="fetch-logs-btn" class="btn btn-small">Fetch</button>
+                    </div>
+                </div>
+                <div class="card-body log-body">
+                    <pre id="log-output" class="log-pre">Loading initial logs...</pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <span>Railway Android Cloud Device • Built with FastAPI, Android SDK, Xvfb & noVNC</span>
+    </footer>
+
+    <script src="/app.js"></script>
+</body>
+</html>
