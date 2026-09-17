@@ -58,8 +58,7 @@ RUN chmod +x /app/scripts/*.sh /app/start.sh && \
     mkdir -p /data /uploads && \
     ln -s /usr/share/novnc /app/web/novnc
 
-# 7. Expose volumes and port
-VOLUME ["/data", "/uploads"]
+# 7. Expose default port
 EXPOSE 8000
 
 # 8. Entrypoint
