@@ -84,7 +84,10 @@ nohup emulator \
     -no-snapshot \
     -camera-back none \
     -camera-front none \
-    -timezone UTC \
+    -cores 2 \
+    -memory 2048 \
+    -skin 720x1280 \
+    -timezone Etc/UTC \
     ${EXTRA_FLAGS} > "${EMULATOR_LOG}" 2>&1 &
 
 EMULATOR_PID=$!

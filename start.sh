@@ -27,6 +27,11 @@ sleep 2
 echo "[2/4] Starting x11vnc server on port 5900..."
 x11vnc -display :0 -forever -shared -nopw -rfbport 5900 -quiet > /dev/null 2>&1 &
 X11VNC_PID=$!
+sleep 1
+
+# Start ADB server so emulator connects immediately
+echo "[ADB] Starting ADB server on port 5037..."
+adb start-server
 
 # 3. Create AVD if needed & Launch Emulator
 echo "[3/4] Preparing AVD and starting Android Emulator..."

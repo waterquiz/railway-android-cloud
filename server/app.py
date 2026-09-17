@@ -141,8 +141,15 @@ async def websocket_vnc_proxy(websocket: WebSocket):
     Bridges browser WebSocket RFB traffic to local VNC server (x11vnc :5900).
     Allows noVNC to work seamlessly through Railway's single exposed HTTPS port.
     """
-    await websocket.accept(subprotocol="binary")
-    
+    subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
+    subprotocols = [s.strip() for s in subprotocols if s.strip()]
+    selected_subprotocol = "binary" if "binary" in subprotocols else None
+
+    if selected_subprotocol:
+        await websocket.accept(subprotocol=selected_subprotocol)
+    else:
+        await websocket.accept()
+
     try:
         reader, writer = await asyncio.open_connection("127.0.0.1", VNC_PORT)
     except Exception as e:
@@ -152,9 +159,13 @@ async def websocket_vnc_proxy(websocket: WebSocket):
     async def ws_to_tcp():
         try:
             while True:
-                data = await websocket.receive_bytes()
-                writer.write(data)
-                await writer.drain()
+                message = await websocket.receive()
+                if "bytes" in message and message["bytes"]:
+                    writer.write(message["bytes"])
+                    await writer.drain()
+                elif "text" in message and message["text"]:
+                    writer.write(message["text"].encode("latin1"))
+                    await writer.drain()
         except (WebSocketDisconnect, asyncio.CancelledError):
             pass
         except Exception:
@@ -165,7 +176,7 @@ async def websocket_vnc_proxy(websocket: WebSocket):
     async def tcp_to_ws():
         try:
             while True:
-                data = await reader.read(4096)
+                data = await reader.read(8192)
                 if not data:
                     break
                 await websocket.send_bytes(data)
@@ -190,7 +201,14 @@ async def websocket_vnc_proxy(websocket: WebSocket):
     except Exception:
         pass
 
-# ----------------- Static Frontend -----------------
+# ----------------- Static Frontend & noVNC -----------------
+
+novnc_system_path = Path("/usr/share/novnc")
+if novnc_system_path.exists():
+    app.mount("/novnc", StaticFiles(directory=str(novnc_system_path), html=True), name="novnc")
+elif (STATIC_DIR / "novnc").exists():
+    app.mount("/novnc", StaticFiles(directory=str(STATIC_DIR / "novnc"), html=True, follow_symlink=True), name="novnc")
 
 if STATIC_DIR.exists():
-    app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="web")
+    app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True, follow_symlink=True), name="web")
+
