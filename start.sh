@@ -17,11 +17,13 @@ export DISPLAY="${DISPLAY:-:0}"
 # Ensure directories exist
 mkdir -p "${DATA_DIR}/avd" "${UPLOADS_DIR}"
 
-# 1. Start virtual display (Xvfb)
-echo "[1/4] Starting Xvfb on display :0 (720x1280x24)..."
-Xvfb :0 -screen 0 720x1280x24 -ac +extension GLX +render -noreset > /dev/null 2>&1 &
+# 1. Start virtual display (Xvfb) and Window Manager (fluxbox)
+echo "[1/4] Starting Xvfb on display :0 (800x1400x24)..."
+Xvfb :0 -screen 0 800x1400x24 -ac +extension GLX +render -noreset > /dev/null 2>&1 &
 XVFB_PID=$!
 sleep 2
+fluxbox -display :0 > /dev/null 2>&1 &
+sleep 1
 
 # 2. Start VNC server (x11vnc on :5900)
 echo "[2/4] Starting x11vnc server on port 5900..."

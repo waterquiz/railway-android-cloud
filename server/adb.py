@@ -62,6 +62,36 @@ def is_boot_completed() -> bool:
     except Exception:
         return False
 
+def get_boot_status() -> Dict[str, Any]:
+    """Returns detailed boot phase properties."""
+    if not is_adb_available():
+        return {"phase": "offline", "detail": "ADB not available"}
+
+    devices = get_devices()
+    if not devices:
+        return {"phase": "starting", "detail": "Emulator process starting..."}
+
+    dev_state = devices[0].get("state", "")
+    if dev_state == "offline":
+        return {"phase": "connecting", "detail": "Emulator connecting to ADB..."}
+
+    try:
+        boot_completed = run_cmd(["adb", "shell", "getprop", "sys.boot_completed"], timeout=3).stdout.strip()
+        if boot_completed == "1":
+            return {"phase": "ready", "detail": "Android OS Ready"}
+
+        bootanim = run_cmd(["adb", "shell", "getprop", "init.svc.bootanim"], timeout=3).stdout.strip()
+        if bootanim == "running":
+            return {"phase": "bootanim", "detail": "Android Boot Animation Running..."}
+
+        zygote = run_cmd(["adb", "shell", "getprop", "init.svc.zygote"], timeout=3).stdout.strip()
+        if zygote == "running":
+            return {"phase": "zygote", "detail": "System services starting up..."}
+
+        return {"phase": "kernel", "detail": "Linux kernel initializing..."}
+    except Exception:
+        return {"phase": "booting", "detail": "Android booting..."}
+
 def get_device_properties() -> Dict[str, str]:
     """Fetches key Android system properties."""
     props = {}

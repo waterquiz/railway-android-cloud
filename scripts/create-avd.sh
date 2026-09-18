@@ -26,14 +26,18 @@ AVD_CONFIG_FILE="${ANDROID_AVD_HOME}/${AVD_NAME}.avd/config.ini"
 if [ -f "${AVD_CONFIG_FILE}" ]; then
     echo "Tuning AVD configuration in ${AVD_CONFIG_FILE}..."
     cat <<EOT >> "${AVD_CONFIG_FILE}"
-hw.lcd.density=320
-hw.lcd.width=720
-hw.lcd.height=1280
+hw.cpu.ncore=2
 hw.ramSize=2048
 vm.heapSize=256
+hw.lcd.density=240
+hw.lcd.width=720
+hw.lcd.height=1280
+hw.keyboard=yes
+hw.mainKeys=no
+hw.dPad=no
 hw.gpu.enabled=yes
 hw.gpu.mode=swiftshader_indirect
-hw.keyboard=yes
+fastboot.forceColdBoot=no
 disk.dataPartition.size=4096M
 EOT
 fi

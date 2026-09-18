@@ -86,12 +86,13 @@ function updateUI(data) {
         screenOverlay.classList.add("hidden");
     } else if (isBooting) {
         statusBadge.className = "badge badge-booting";
-        statusText.textContent = "Android Booting...";
+        const phaseDetail = data.boot_phase?.detail || "Android Booting...";
+        statusText.textContent = phaseDetail;
         if (!overlayDismissedByUser) {
             screenOverlay.classList.remove("hidden");
         }
-        overlayTitle.textContent = "Android OS is Booting...";
-        overlayDesc.textContent = "Initial boot can take 1-3 minutes in software mode. Click below to view the live boot screen.";
+        overlayTitle.textContent = "Android OS Initializing";
+        overlayDesc.textContent = `${phaseDetail} - Boot animation will show momentarily on the screen.`;
     } else {
         statusBadge.className = "badge badge-offline";
         statusText.textContent = "Emulator Stopped";

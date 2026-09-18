@@ -54,7 +54,7 @@ else
     echo " Fallback: Launching with -no-accel      "
     echo " (Performance will be slower on cloud)   "
     echo "========================================="
-    EXTRA_FLAGS="-no-accel"
+    EXTRA_FLAGS="-no-accel -feature -Vulkan -feature -GLDirectMem"
     MODE="software"
     MESSAGE="KVM unavailable. Running in fallback software emulation mode (-no-accel)."
 fi
@@ -75,12 +75,11 @@ echo "Starting emulator '${AVD_NAME}' (Output -> ${EMULATOR_LOG})..."
 # Launch Android emulator in background
 # -gpu swiftshader_indirect renders OpenGL in software to Xvfb
 # -no-snapshot prevents corrupted state on container restart
-# -no-audio and -no-boot-anim save CPU cycles
+# Note: -no-boot-anim removed so user sees the active Android boot screen instead of a black screen
 nohup emulator \
     -avd "${AVD_NAME}" \
     -gpu swiftshader_indirect \
     -no-audio \
-    -no-boot-anim \
     -no-snapshot \
     -camera-back none \
     -camera-front none \

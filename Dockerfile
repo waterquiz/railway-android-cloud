@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     xvfb \
     x11vnc \
+    fluxbox \
     novnc \
     websockify \
     adb \

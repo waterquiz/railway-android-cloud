@@ -46,6 +46,7 @@ def get_status():
     kvm_info = emulator.get_kvm_status()
     is_running = emulator.is_emulator_running()
     boot_done = adb.is_boot_completed() if is_running else False
+    boot_phase = adb.get_boot_status() if is_running else {"phase": "offline", "detail": "Emulator offline"}
     devices = adb.get_devices() if is_running else []
     props = adb.get_device_properties() if boot_done else {}
     installed_apps = adb.list_installed_apps() if boot_done else []
@@ -54,6 +55,7 @@ def get_status():
         "status": "online" if boot_done else ("booting" if is_running else "offline"),
         "emulator_running": is_running,
         "boot_completed": boot_done,
+        "boot_phase": boot_phase,
         "kvm": kvm_info,
         "devices": devices,
         "device_info": props,
