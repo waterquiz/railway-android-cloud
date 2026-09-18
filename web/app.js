@@ -226,10 +226,17 @@ function showApkResult(data) {
         resInstallStatus.textContent = "Installed ✅";
         resInstallStatus.style.color = "var(--success)";
         installBtn.textContent = "Reinstall";
+        installBtn.disabled = false;
+    } else if (data.install_details?.pending_boot) {
+        resInstallStatus.textContent = "Queued ⏳ (Auto-installing upon boot)";
+        resInstallStatus.style.color = "var(--warning)";
+        installBtn.textContent = "Queued (Waiting for boot)";
+        installBtn.disabled = true;
     } else {
         resInstallStatus.textContent = "Not Installed";
         resInstallStatus.style.color = "var(--warning)";
         installBtn.textContent = "Install APK";
+        installBtn.disabled = false;
     }
 }
 
@@ -249,8 +256,13 @@ async function triggerInstall() {
             resInstallStatus.textContent = "Installed ✅";
             resInstallStatus.style.color = "var(--success)";
             alert("App successfully installed on Android emulator!");
+        } else if (data.pending_boot) {
+            resInstallStatus.textContent = "Queued ⏳ (Auto-installing upon boot)";
+            resInstallStatus.style.color = "var(--warning)";
+            installBtn.textContent = "Queued (Waiting for boot)";
+            installBtn.disabled = true;
         } else {
-            alert(`Installation failed: ${data.message}`);
+            alert(`Installation notice: ${data.message}`);
         }
     } catch (e) {
         alert(`Error installing APK: ${e.message}`);

@@ -77,6 +77,17 @@ def restart_emulator():
 
 # ----------------- APK Upload & Management -----------------
 
+pending_install_results = {}
+
+async def wait_and_install(apk_path: Path):
+    """Waits for Android to finish booting, then automatically installs the APK."""
+    for _ in range(60): # Poll for up to 5 minutes
+        await asyncio.sleep(5)
+        if adb.is_boot_completed():
+            res = adb.install_apk(apk_path)
+            pending_install_results[apk_path.name] = res
+            break
+
 @app.post("/api/upload")
 async def upload_apk(file: UploadFile = File(...), auto_install: bool = True):
     if not file.filename.endswith(".apk"):
@@ -93,7 +104,15 @@ async def upload_apk(file: UploadFile = File(...), auto_install: bool = True):
     install_result = None
 
     if auto_install:
-        install_result = adb.install_apk(target_path)
+        if adb.is_boot_completed():
+            install_result = adb.install_apk(target_path)
+        else:
+            install_result = {
+                "success": False,
+                "pending_boot": True,
+                "message": "APK uploaded! Android is currently completing startup and will install it automatically when ready."
+            }
+            asyncio.create_task(wait_and_install(target_path))
 
     return {
         "filename": file.filename,
@@ -108,6 +127,15 @@ def install_uploaded_apk(req: InstallRequest):
     target_path = UPLOADS_DIR / req.filename
     if not target_path.exists():
         raise HTTPException(status_code=404, detail="Specified APK file not found in uploads.")
+    
+    if not adb.is_boot_completed():
+        asyncio.create_task(wait_and_install(target_path))
+        return {
+            "success": False,
+            "pending_boot": True,
+            "message": "Android is still completing startup. App queued and will install automatically upon boot."
+        }
+
     result = adb.install_apk(target_path)
     return result
 
