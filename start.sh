@@ -25,10 +25,12 @@ sleep 2
 fluxbox -display :0 > /dev/null 2>&1 &
 sleep 1
 
-# 2. Start VNC server (x11vnc on :5900)
-echo "[2/4] Starting x11vnc server on port 5900..."
-x11vnc -display :0 -forever -shared -nopw -rfbport 5900 -quiet > /dev/null 2>&1 &
-X11VNC_PID=$!
+# 2. Start VNC server (x11vnc on :5900 with auto-restart supervisor)
+echo "[2/4] Starting x11vnc server on port 5900 with auto-restart..."
+while true; do
+    x11vnc -display :0 -forever -shared -nopw -rfbport 5900 -repeat -noxdamage -wait 50 -defer 50 -quiet
+    sleep 1
+done > /dev/null 2>&1 &
 sleep 1
 
 # Start ADB server so emulator connects immediately

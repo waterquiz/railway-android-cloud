@@ -164,12 +164,12 @@
                         <button id="toggle-overlay-btn" class="btn btn-small" title="Toggle Boot Overlay">👁️ View Screen</button>
                         <button id="refresh-screen-btn" class="btn btn-small" title="Force Screen Refresh">🔄 Refresh</button>
                         <button id="fullscreen-btn" class="btn btn-small" title="Fullscreen">⛶ Fullscreen</button>
-                        <a id="vnc-direct-link" href="/novnc/vnc_lite.html?path=websockify&autoconnect=true&resize=scale" target="_blank" class="btn btn-small" title="Open Full noVNC Client">Open noVNC ↗</a>
+                        <a id="vnc-direct-link" href="/novnc/vnc_lite.html?path=websockify&autoconnect=true&reconnect=true&reconnect_delay=2000&resize=scale" target="_blank" class="btn btn-small" title="Open Full noVNC Client">Open noVNC ↗</a>
                     </div>
                 </div>
                 <div class="screen-viewport-wrapper">
                     <!-- Embedded noVNC Frame -->
-                    <iframe id="novnc-frame" src="/novnc/vnc_lite.html?path=websockify&autoconnect=true&resize=scale" class="vnc-iframe" allowfullscreen></iframe>
+                    <iframe id="novnc-frame" src="/novnc/vnc_lite.html?path=websockify&autoconnect=true&reconnect=true&reconnect_delay=2000&resize=scale" class="vnc-iframe" allowfullscreen></iframe>
                     
                     <!-- Booting / Offline Overlay -->
                     <div id="screen-overlay" class="screen-overlay">
